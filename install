@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
 
-chcon -Rt svirt_sandbox_file_t ../
-mkdir -p ../website/storage
-chmod -R 777 ../website/storage
+chcon -Rt svirt_sandbox_file_t ./
 
-docker-compose up -d nginx python
+docker-compose up -d
