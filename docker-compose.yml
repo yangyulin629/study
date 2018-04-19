@@ -1,0 +1,144 @@
+version: '2'
+
+services:
+
+### Applications Code Container #############################
+
+    applications:
+      image: tianon/true
+      volumes:
+        - ./src:/var/www
+
+### NGINX Server Container ##################################
+
+    nginx:
+      build:
+        context: ./nginx
+      restart: always
+      volumes_from:
+        - applications
+      volumes:
+        - ./logs/nginx:/var/log/nginx
+        - ./nginx/sites:/etc/nginx/sites-available
+        - ./nginx/conf.d:/etc/nginx/conf.d
+      ports:
+        - "8056:56"
+        - "8072:72"
+        - "8073:73"
+      depends_on:
+        - fpm56
+        - fpm72
+        - fcgi
+      networks:
+        - frontend
+        - backend
+
+### PHP-FPM Container #######################################
+
+    fpm56:
+      build:
+        context: ./fpm
+        dockerfile: "./56/Dockerfile-CentOS"
+      restart: always
+      volumes_from:
+        - applications
+      volumes:
+        - ./fpm/56/php.ini:/usr/local/lib/php.ini
+        - ./fpm/56/php-fpm.conf:/usr/local/etc/php-fpm.conf
+      tty: true
+      networks:
+        - backend
+
+    fpm72:
+      build:
+        context: ./fpm
+        dockerfile: "./72/Dockerfile-CentOS"
+      restart: always
+      volumes_from:
+        - applications
+      volumes:
+        - ./fpm/72/php.ini:/usr/local/lib/php.ini
+        - ./fpm/72/php-fpm.conf:/usr/local/etc/php-fpm.conf
+        - ./fpm/72/php-fpm.d:/usr/local/etc/php-fpm.d
+      tty: true
+      networks:
+        - backend
+### PHP-CGI Container #######################################
+
+    fcgi:
+      build:
+        context: ./fcgi
+        dockerfile: "./Dockerfile-CentOS"
+      restart: always
+      volumes_from:
+        - applications
+      volumes:
+        - ./fcgi/php.ini:/usr/local/lib/php.ini
+      tty: true
+      networks:
+        - backend
+
+### Apache Non ZTS Container #######################################
+
+    apache-non-zts:
+      build:
+        context: ./apache
+        dockerfile: "./non-zts/Dockerfile-CentOS"
+      restart: always
+      volumes_from:
+        - applications
+      ports:
+        - "8074:80"
+      volumes:
+        - ./apache/php.ini:/usr/local/lib/php.ini
+        - ./apache/httpd.conf:/usr/local/apache2/conf/httpd.conf
+        - ./logs/apache/non-zts:/usr/local/apache2/logs
+      tty: true
+      networks:
+        - backend
+
+### Apache Fast CGI Container #######################################
+
+    apache-fastcgi:
+      build:
+        context: ./apache
+        dockerfile: "./fastcgi/Dockerfile-CentOS"
+      restart: always
+      volumes_from:
+        - applications
+      ports:
+        - "8075:80"
+      volumes:
+        - ./apache/php.ini:/usr/local/lib/php.ini
+        - ./apache/fastcgi/httpd.conf:/usr/local/apache2/conf/httpd.conf
+        - ./logs/apache/fastcgi:/usr/local/apache2/logs
+      tty: true
+      networks:
+        - backend
+
+### Apache ZTS Container #######################################
+
+    apache-zts:
+      build:
+        context: ./apache
+        dockerfile: "./zts/Dockerfile-CentOS"
+      restart: always
+      volumes_from:
+        - applications
+      ports:
+        - "8076:80"
+      volumes:
+        - ./apache/php.ini:/usr/local/lib/php.ini
+        - ./apache/httpd.conf:/usr/local/apache2/conf/httpd.conf
+        - ./logs/apache/zts:/usr/local/apache2/logs
+      tty: true
+      networks:
+        - backend
+### Networks Setup ############################################
+
+networks:
+  frontend:
+    driver: "bridge"
+  backend:
+    driver: "bridge"
+

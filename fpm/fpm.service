@@ -1,0 +1,13 @@
+[Unit]
+Description=PHP-FPM
+After=local-fs.target network.target nginx.service
+
+[Service]
+Type=simple
+KillMode=process
+ExecStart=/usr/local/sbin/php-fpm --nodaemonize
+ExecReload=/bin/kill -USR2 $MAINPID
+ExecStop=/bin/kill -s QUIT $MAINPID
+
+[Install]
+WantedBy=multi-user.target

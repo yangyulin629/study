@@ -1,0 +1,18 @@
+FROM debian:stretch-slim
+
+MAINTAINER David Yang <yangyulin629@163.com>
+
+RUN apt-get update \
+  && apt-get -y install gcc libxml2-dev wget autoconf make
+
+RUN wget http://cn2.php.net/distributions/php-5.6.35.tar.gz \
+  && tar -zxvf php-5.6.35.tar.gz \
+  && cd php-5.6.35 \
+  && ./configure --enable-fpm --disable-cli --disable-cgi --with-fpm-user=www-data --with-fpm-group=www-data\
+  && make \
+  && make install
+
+WORKDIR /var/www
+
+
+

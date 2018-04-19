@@ -1,0 +1,40 @@
+FROM centos:7
+
+MAINTAINER David Yang <yangyulin629@163.com>
+
+RUN (cd /lib/systemd/system/sysinit.target.wants/; for i in *; do [ $i == \
+systemd-tmpfiles-setup.service ] || rm -f $i; done); \
+rm -f /lib/systemd/system/multi-user.target.wants/*;\
+rm -f /etc/systemd/system/*.wants/*;\
+rm -f /lib/systemd/system/local-fs.target.wants/*; \
+rm -f /lib/systemd/system/sockets.target.wants/*udev*; \
+rm -f /lib/systemd/system/sockets.target.wants/*initctl*; \
+rm -f /lib/systemd/system/basic.target.wants/*;\
+rm -f /lib/systemd/system/anaconda.target.wants/*;
+VOLUME [ "/sys/fs/cgroup" ]
+
+RUN yum -y install gcc libxml2-devel wget autoconf make apr-util-devel perl-devel pcre-devel
+
+RUN wget http://mirrors.tuna.tsinghua.edu.cn/apache/httpd/httpd-2.4.29.tar.gz \
+  && tar -zxvf httpd-2.4.29.tar.gz \
+  && cd httpd-2.4.29 \
+  && ./configure --enable-so --with-mpm=prefork \
+  && make \
+  && make install
+
+RUN wget http://cn2.php.net/distributions/php-7.2.4.tar.gz \
+  && tar -zxvf php-7.2.4.tar.gz \
+  && cd php-7.2.4 \
+  && ./configure --with-apxs2=/usr/local/apache2/bin/apxs --disable-cli --disable-cgi \
+  && make \
+  && make install
+
+WORKDIR /var/www
+
+COPY httpd.service /etc/systemd/system/httpd.service
+
+RUN systemctl enable httpd.service
+
+CMD ["/usr/sbin/init"]
+
+EXPOSE 80

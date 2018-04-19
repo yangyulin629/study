@@ -1,0 +1,13 @@
+[Unit]
+Description=Apache2
+After=syslog.target network.target remote-fs.target nss-lookup.target
+
+[Service]
+Type=forking
+KillMode=process
+ExecStart=/usr/local/apache2/bin/httpd -k start
+ExecReload=/usr/local/apache2/bin/httpd -k restart
+ExecStop=/usr/local/apache2/bin/httpd -k stop
+
+[Install]
+WantedBy=multi-user.target
