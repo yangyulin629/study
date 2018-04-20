@@ -22,6 +22,15 @@ RUN wget http://cn2.php.net/distributions/php-7.2.4.tar.gz \
   && make \
   && make install
 
+RUN cd / \
+  && wget https://xdebug.org/files/xdebug-2.6.0.tgz \
+  && tar -zxvf xdebug-2.6.0.tgz \
+  && cd xdebug-2.6.0 \
+  && phpize \
+  && ./configure \
+  && make \
+  && make install
+
 WORKDIR /var/www
 
 COPY fpm.service /etc/systemd/system/fpm.service

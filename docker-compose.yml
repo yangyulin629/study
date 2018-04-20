@@ -78,6 +78,21 @@ services:
       networks:
         - backend
 
+### CLI Container #######################################
+
+    cli:
+      build:
+        context: ./cli
+        dockerfile: "./Dockerfile-CentOS"
+      restart: always
+      volumes_from:
+        - applications
+      volumes:
+        - ./cli/php.ini:/usr/local/lib/php.ini
+      tty: true
+      networks:
+        - backend
+
 ### Apache Non ZTS Container #######################################
 
     apache-non-zts:
