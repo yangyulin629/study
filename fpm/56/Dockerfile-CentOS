@@ -22,6 +22,15 @@ RUN wget http://cn2.php.net/distributions/php-5.6.35.tar.gz \
   && make \
   && make install
 
+RUN cd / \
+  && wget https://xdebug.org/files/xdebug-2.5.5.tgz \
+  && tar -zxvf xdebug-2.5.5.tgz \
+  && cd xdebug-2.5.5 \
+  && phpize \
+  && ./configure \
+  && make \
+  && make install
+
 WORKDIR /var/www
 
 COPY fpm.service /etc/systemd/system/fpm.service
