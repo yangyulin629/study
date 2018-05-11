@@ -18,7 +18,8 @@ xdebug_debug_zval('d');
 xdebug_debug_zval('e');
 
 
-$x = ['1', '2'];
+$x = ['life', 'work', 3];
+$z = ['life', 'work', 4];
 $y = $x;
 // echo count($y);
 echo '<br>';
@@ -32,3 +33,9 @@ xdebug_debug_zval('x');
 xdebug_debug_zval('y');
 
 debug_zval_dump($x);
+
+$a = array( 'meaning' => 'life', 'number' => 42 );
+$a['life'] = $a['meaning'];
+xdebug_debug_zval( 'a' );
+unset( $a['meaning'], $a['number'] );
+xdebug_debug_zval( 'a' );
