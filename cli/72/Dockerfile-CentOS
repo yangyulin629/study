@@ -1,0 +1,75 @@
+FROM centos:7
+
+MAINTAINER David Yang <yangyulin629@163.com>
+
+RUN (cd /lib/systemd/system/sysinit.target.wants/; for i in *; do [ $i == \
+systemd-tmpfiles-setup.service ] || rm -f $i; done); \
+rm -f /lib/systemd/system/multi-user.target.wants/*;\
+rm -f /etc/systemd/system/*.wants/*;\
+rm -f /lib/systemd/system/local-fs.target.wants/*; \
+rm -f /lib/systemd/system/sockets.target.wants/*udev*; \
+rm -f /lib/systemd/system/sockets.target.wants/*initctl*; \
+rm -f /lib/systemd/system/basic.target.wants/*;\
+rm -f /lib/systemd/system/anaconda.target.wants/*;
+VOLUME [ "/sys/fs/cgroup" ]
+
+RUN yum -y install gcc libxml2-devel wget autoconf make gdb
+
+RUN wget http://us2.php.net/distributions/php-7.2.4.tar.gz
+
+RUN yum -y install openssl-devel
+
+RUN tar -zxvf php-7.2.4.tar.gz \
+  && cd php-7.2.4 \
+  && ./configure --disable-cgi --enable-debug --with-openssl\
+  && make \
+  && make install \
+  && cd .. \
+  && rm -rf php-7.2.4 php-7.2.4.tar.gz
+
+RUN wget https://pecl.php.net/get/vld-0.14.0.tgz
+
+RUN tar -zxvf vld-0.14.0.tgz \
+  && cd vld-0.14.0 && phpize \
+  && ./configure --with-php-config=/usr/local/bin/php-config --enable-vld \
+  && make \
+  && make install \
+  && cd .. \
+  && rm -rf vld-0.14.0 vld-0.14.0.tgz
+
+RUN wget https://github.com/swoole/swoole-src/archive/v4.0.0.tar.gz
+
+RUN yum -y install gcc-c++
+
+RUN wget https://github.com/redis/hiredis/archive/v0.13.3.tar.gz \
+    && tar zxvf v0.13.3.tar.gz \
+    && cd hiredis-0.13.3/ \
+    && make -j \
+    && make install \
+    && ldconfig \
+    && cd .. \
+    && rm -rf hiredis-0.13.3 v0.13.3.tar.gz
+
+RUN echo "/usr/local/lib" >> /etc/ld.so.conf.d/libc.conf \
+    && ldconfig \
+    && echo "export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib" >> ~/.bash_profile \
+    && source ~/.bash_profile
+
+
+RUN tar -zxvf v4.0.0.tar.gz \
+  && cd swoole-src-4.0.0 && phpize \
+  && ./configure --enable-async-redis \
+  && make \
+  && make install \
+  && cd .. \
+  && rm -rf swoole-src-4.0.0 v4.0.0.tar.gz
+
+RUN pecl install mongodb
+
+RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+
+WORKDIR /var/www
+
+CMD ["/usr/sbin/init"]
+
+EXPOSE 80

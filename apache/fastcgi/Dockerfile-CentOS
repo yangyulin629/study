@@ -15,25 +15,33 @@ VOLUME [ "/sys/fs/cgroup" ]
 
 RUN yum -y install gcc libxml2-devel wget autoconf make apr-util-devel perl-devel pcre-devel
 
-RUN wget http://mirrors.tuna.tsinghua.edu.cn/apache/httpd/httpd-2.4.29.tar.gz \
-  && tar -zxvf httpd-2.4.29.tar.gz \
+RUN wget http://mirrors.tuna.tsinghua.edu.cn/apache/httpd/httpd-2.4.29.tar.gz
+
+RUN tar -zxvf httpd-2.4.29.tar.gz \
   && cd httpd-2.4.29 \
   && ./configure --enable-so \
   && make \
-  && make install
+  && make install \
+  && cd .. \
+  && rm -rf httpd-2.4.29 httpd-2.4.29.tar.gz
 
-RUN wget http://cn2.php.net/distributions/php-7.2.4.tar.gz \
-  && tar -zxvf php-7.2.4.tar.gz \
+RUN wget http://us2.php.net/distributions/php-7.2.4.tar.gz
+
+RUN tar -zxvf php-7.2.4.tar.gz \
   && cd php-7.2.4 \
   && ./configure --disable-cli \
   && make \
-  && make install
+  && make install \
+  && cd .. \
+  && rm -rf php-7.2.4 php-7.2.4.tar.gz
 
 RUN wget http://mirrors.tuna.tsinghua.edu.cn/apache/httpd/mod_fcgid/mod_fcgid-2.3.9.tar.gz \
   && tar -zxvf mod_fcgid-2.3.9.tar.gz \
   && cd mod_fcgid-2.3.9 && APXS=/usr/local/apache2/bin/apxs ./configure.apxs \
   && make \
-  && make install
+  && make install \
+  && cd .. \
+  && rm -rf mod_fcgid-2.3.9 mod_fcgid-2.3.9.tar.gz
 
 WORKDIR /var/www
 

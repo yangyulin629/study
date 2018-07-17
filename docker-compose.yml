@@ -61,6 +61,8 @@ services:
         - ./fpm/72/php-fpm.conf:/usr/local/etc/php-fpm.conf
         - ./fpm/72/php-fpm.d:/usr/local/etc/php-fpm.d
       tty: true
+      ports:
+        - "9000:9000"
       networks:
         - backend
 ### PHP-CGI Container #######################################
@@ -80,19 +82,33 @@ services:
 
 ### CLI Container #######################################
 
-    cli:
+    cli72:
       build:
         context: ./cli
-        dockerfile: "./Dockerfile-CentOS"
+        dockerfile: "./72/Dockerfile-CentOS"
       restart: always
       volumes_from:
         - applications
       volumes:
-        - ./cli/php.ini:/usr/local/lib/php.ini
+        - ./cli/72/php.ini:/usr/local/lib/php.ini
       tty: true
+      ports:
+        - "8080:80"
       networks:
         - backend
 
+    cli56:
+      build:
+        context: ./cli
+        dockerfile: "./56/Dockerfile-CentOS"
+      restart: always
+      volumes_from:
+        - applications
+      volumes:
+        - ./cli/56/php.ini:/usr/local/lib/php.ini
+      tty: true
+      networks:
+        - backend
 ### Apache Non ZTS Container #######################################
 
     apache-non-zts:
@@ -149,6 +165,34 @@ services:
       tty: true
       networks:
         - backend
+
+### Redis Container #######################################
+    redis:
+      image: redis
+      restart: always
+      ports:
+        - 6379
+      networks:
+        - backend
+
+### Memcached Container #######################################
+    mem:
+      image: memcached
+      restart: always
+      ports:
+        - 11211
+      networks:
+        - backend
+
+### Memcached Container #######################################
+    mongo:
+      image: mongo
+      restart: always
+      ports:
+        - 27017:27017
+      networks:
+        - backend
+
 ### Networks Setup ############################################
 
 networks:

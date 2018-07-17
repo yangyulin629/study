@@ -15,12 +15,15 @@ VOLUME [ "/sys/fs/cgroup" ]
 
 RUN yum -y install gcc libxml2-devel wget autoconf make
 
-RUN wget http://cn2.php.net/distributions/php-7.2.4.tar.gz \
-  && tar -zxvf php-7.2.4.tar.gz \
+RUN wget http://us2.php.net/distributions/php-7.2.4.tar.gz
+
+RUN tar -zxvf php-7.2.4.tar.gz \
   && cd php-7.2.4 \
   && ./configure --disable-cli\
   && make \
-  && make install
+  && make install \
+  && cd .. \
+  && rm -rf php-7.2.4 php-7.2.4.tar.gz
 
 WORKDIR /var/www
 
